@@ -34,9 +34,9 @@ set guioptions-=T
 set guioptions-=r
 set guioptions-=L
 
-set backupdir=c:\\vim\\tmp,c:\\tmp,c:\\temp,.
-set directory=c:\\vim\\tmp,c:\\tmp,c:\\temp,.
-set undodir=c:\\vim\\undo,c:\\tmp,c:\\temp,.
+set backupdir=c:\\vim\\tmp,c:\\tmp,c:\\temp,/tmp,.
+set directory=c:\\vim\\tmp,c:\\tmp,c:\\temp,/tmp,.
+set undodir=c:\\vim\\undo,c:\\tmp,c:\\temp,/tmp,.
 
 set hidden
 
