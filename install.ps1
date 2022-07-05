@@ -7,7 +7,7 @@ if ((Get-Command "choco" -ErrorAction SilentlyContinue) -eq $null) {
 }
 
 # Now other essential tools
-choco install 7zip ag git lightshot paint.net vim -y
+choco install 7zip ag git lightshot paint.net vim keepass putty python3 TotalCommander  -y
 
 # Vim setup
 $vimrc = "$env:USERPROFILE\_vimrc"
