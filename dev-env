@@ -1,0 +1,84 @@
+#!/usr/bin/env bash
+
+script_dir=$(cd $(dirname "${BASH_SOURCE[0]}") && pwd)
+filter=""
+dry="0"
+
+while [[ $# > 0 ]]; do
+	if [[ $1 == "--dry" ]]; then
+		dry="1"
+	else
+		filter=$1
+	fi
+	shift
+done
+
+log() {
+	if [[ $dry == "1" ]]; then
+		echo "[DRY_RUN]: $@"
+	else
+		echo "$@"
+	fi
+}
+
+execute() {
+	log "execute $@"
+	if [[ $dry == "1" ]]; then
+		return
+	fi
+	"$@"
+}
+	
+copy_dir() {
+	from=$1
+	to=$2
+
+	log "copy dir $@"
+	pushd $from > /dev/null
+	dirs=$(find . -mindepth 1 -maxdepth 1 -type d)
+	for dir in ${dirs[@]}; do
+		execute rm -rf $to/$dir
+		execute cp -r $dir $to/$dir
+	done
+
+	popd > /dev/null
+}
+
+copy_file() {
+	from=$1
+	to=$2
+
+	log "copy file $@"
+
+   file=$(basename "$from")
+   execute rm $to/$file
+   execute cp $from $to/$file
+}
+
+log "-------------- dev env --------------"
+
+if [ -z ${XDG_CONFIG_HOME+x} ]; then
+	echo "XDG_CONFIG_HOME is not set"
+	exit 1
+fi
+
+if [ ! -d "$XDG_CONFIG_HOME" ]; then
+	execute mkdir -p "$XDG_CONFIG_HOME"
+fi
+
+if [ -z ${XDG_CONFIG_HOME+x} ]; then
+	echo "XDG_DATA_HOME is not set"
+	exit 1
+fi
+
+if [ ! -d "$XDG_DATA_HOME" ]; then
+	execute mkdir -p "$XDG_DATA_HOME"
+fi
+
+if [ ! -d "$HOME/.local/bin" ]; then
+	execute mkdir -p "$HOME/.local/bin"
+fi
+
+cd $script_dir
+copy_dir .config $XDG_CONFIG_HOME
+copy_file .tmux.conf $HOME
