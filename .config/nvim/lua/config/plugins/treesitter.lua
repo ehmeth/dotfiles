@@ -1,26 +1,44 @@
-return {
-  {
-    "nvim-treesitter/nvim-treesitter",
-    build = ":TSUpdate",
-    config = function()
-      require'nvim-treesitter.config'.setup {
-        ensure_installed = { "c", "cpp", "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline" },
-        auto_install = false,
-        highlight = {
-          enable = true,
-          highlight = {
-            enable = true,
-            disable = function(lang, buf)
-              local max_filesize = 100 * 1024 -- 100 KB
-              local ok, stats = pcall(vim.loop.fs_stat, vim.api.nvim_buf_get_name(buf))
-              if ok and stats and stats.size > max_filesize then
-                return true
-              end
-            end,
-            additional_vim_regex_highlighting = false,
-          },
-        }
-      }
-    end
-  },
+vim.pack.add({
+  "https://github.com/nvim-treesitter/nvim-treesitter",
+})
+
+----- Treesitter -----
+-- modified version of code from this config
+--https://github.com/fredrikaverpil/dotfiles/blob/main/nvim-fredrik/lua/fredrik/plugins/core/treesitter.lua
+local ts_ensure_installed = {
+  "bash",
+  "c",
+  "css",
+  "diff",
+  "html",
+  "javascript",
+  "jsdoc",
+  "json",
+  "lua",
+  "luadoc",
+  "markdown",
+  "markdown_inline",
+  "python",
+  "query",
+  "regex",
+  "toml",
+  "typescript",
+  "vim",
+  "vimdoc",
+  "yaml",
 }
+
+-- Install parsers and register them for filetypes
+require("nvim-treesitter").install(ts_ensure_installed)
+
+for _, parser in ipairs(ts_ensure_installed) do
+  vim.treesitter.language.register(parser, parser)
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = parser,
+    callback = function(event)
+      vim.treesitter.start(event.buf, parser)
+    end,
+  })
+end
+
+require('nvim-treesitter').update()

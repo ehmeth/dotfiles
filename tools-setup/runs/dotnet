@@ -1,0 +1,6 @@
+sudo apt-get update &&  sudo apt-get install -y dotnet-sdk-10.0 aspnetcore-runtime-10.0
+
+dotnet tool install --tool-path=$XDG_DATA_HOME/software/roslyn-language-server roslyn-language-server --prerelease --source https://pkgs.dev.azure.com/azure-public/vside/_packaging/vs-impl/nuget/v3/index.json
+
+ln -s $XDG_DATA_HOME/software/roslyn-language-server/roslyn-language-server $HOME/.local/bin/roslyn-language-server
+

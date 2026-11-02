@@ -55,10 +55,31 @@ copy_file() {
    execute cp $from $to/$file
 }
 
+setup_xdg() {
+   if [ -z $(grep 'XDG_CONFIG_HOME=' ${HOME}/.profile) ]; then
+      echo 'export XDG_CONFIG_HOME="$HOME/.config"' >> ${HOME}/.profile
+   fi
+   if [ -z $(grep 'XDG_DATA_HOME=' ${HOME}/.profile) ]; then
+      echo 'export XDG_DATA_HOME="$HOME/.local/share"' >> ${HOME}/.profile
+   fi
+}
+
+setup_local_cargo_bin() {
+   if [ -z "$(grep '$HOME/.cargo/bin' ${HOME}/.profile)" ]; then
+      cat <<'EOF' >> ${HOME}/.profile
+if [ -d "$HOME/.cargo/bin" ] ; then
+   PATH="$HOME/.cargo/bin:$PATH"
+fi
+EOF
+   fi
+}
+
 log "-------------- dev env --------------"
 
 if [ -z ${XDG_CONFIG_HOME+x} ]; then
-	echo "XDG_CONFIG_HOME is not set"
+	log "setting XDG_CONFIG_HOME in .profile"
+   setup_xdg
+   log "restart terminal and try again"
 	exit 1
 fi
 
@@ -67,7 +88,9 @@ if [ ! -d "$XDG_CONFIG_HOME" ]; then
 fi
 
 if [ -z ${XDG_CONFIG_HOME+x} ]; then
-	echo "XDG_DATA_HOME is not set"
+	log "setting XDG_CONFIG_HOME in .profile"
+   setup_xdg
+   log "restart terminal and try again"
 	exit 1
 fi
 
@@ -79,6 +102,10 @@ if [ ! -d "$HOME/.local/bin" ]; then
 	execute mkdir -p "$HOME/.local/bin"
 fi
 
+setup_local_cargo_bin
+
 cd $script_dir
 copy_dir .config $XDG_CONFIG_HOME
 copy_file .tmux.conf $HOME
+
+execute ./tools-setup/run $filter

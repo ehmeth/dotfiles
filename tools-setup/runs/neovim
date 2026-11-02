@@ -1,0 +1,32 @@
+#!/usr/bin/env bash
+
+sudo apt install -y build-essential lua5.4 luarocks fd-find ripgrep llvm clangd cmake make fzf
+
+rm -rf $XDG_DATA_HOME/software/neovim
+git clone -b "release-0.12" --depth 1 https://github.com/neovim/neovim.git $XDG_DATA_HOME/software/neovim
+pushd $XDG_DATA_HOME/software/neovim > /dev/null
+make CMAKE_BUILD_TYPE=RelWithDebInfo CMAKE_EXTRA_FLAGS="-DCMAKE_INSTALL_PREFIX=$HOME/.local"
+sudo make install
+popd > /dev/null
+
+cpu_arch=$(uname -m)
+if [ $cpu_arch = 'aarch64' ]; then
+   cpu_arch=arm64
+else
+   cpu_arch=x64
+fi
+
+rm $HOME/.local/bin/lua-language-server
+rm -rf $XDG_DATA_HOME/software/lua-language-server
+mkdir -p $XDG_DATA_HOME/software/lua-language-server
+pushd $XDG_DATA_HOME/software/lua-language-server > /dev/null
+curl -L -O https://github.com/LuaLS/lua-language-server/releases/download/3.19.1/lua-language-server-3.19.1-linux-${cpu_arch}.tar.gz > /dev/null
+tar -xf lua-language-server-3.19.1-linux-${cpu_arch}.tar.gz -av  > /dev/null
+ln -s $XDG_DATA_HOME/software/lua-language-server/bin/lua-language-server $HOME/.local/bin/lua-language-server
+popd > /dev/null
+
+sudo luarocks install luacheck
+
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --no-modify-path
+cargo install cargo-binstall --locked
+cargo binstall tree-sitter-cli
